@@ -1,2 +1,2 @@
 # MERN_PROJECTS
-This repos content a fullstack project with MERN 
+This repos contain a fullstack project with MERN 
