@@ -1,0 +1,31 @@
+Vagrant.configure("2") do |config|
+  # Base box
+  config.vm.box = "hashicorp/bionic64"
+
+  # VirtualBox settings
+  config.vm.provider 'virtualbox' do |v|
+    v.memory = 2048 # 2GB RAM for better performance
+    v.cpus = 2
+  end
+
+  # Provisioning script
+  config.vm.provision :shell, privileged: false, inline: <<-SHELL
+    # Install the latest NVM version
+    curl -k -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+
+    # Add NVM to shell profile for persistence
+    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion"' >> ~/.bashrc
+
+    # Reload the shell profile
+    source ~/.bashrc
+
+    # Install Node.js
+    nvm install node
+  SHELL
+
+  # Port forwarding
+  config.vm.network :forwarded_port, guest: 3000, host: 3000 # React dev server
+  config.vm.network :forwarded_port, guest: 5000, host: 5000 # Node.js backend
+end
