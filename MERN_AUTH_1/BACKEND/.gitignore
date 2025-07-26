@@ -1,0 +1,9 @@
+# Ignore node modules
+node_modules/
+
+# Ignore all .env files
+.env
+*.env
+
+# Ignore package lock file (optional: only if you don't want to lock versions)
+package-lock.json
