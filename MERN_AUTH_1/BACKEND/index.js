@@ -6,7 +6,9 @@ import bodyParser from "body-parser";
 import helmet from 'helmet';
 import morgan from "morgan";
 import authRoutes from './routes/user.auth.js';
-import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+
 
 import errorHandler from './middlewares/ErrorHandler.js';
 
@@ -16,6 +18,14 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+// Global rate limiter
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Middlewares
 // Parse request bodies
@@ -26,6 +36,9 @@ app.use(helmet());
 
 // Enable cors
 app.use(cors());
+// Middleware for parsing cookies
+app.use(cookieParser());
+app.use(globalLimiter); // Correctly applies to all requests
 
 // Routes
 app.use('/api/v1/users/auth', authRoutes);
@@ -65,3 +78,4 @@ mongoose.connect(process.env.MONGO_URI)
 // npm install body-parser
 // npm install helmet morgan
 // npm install express-session
+// npm i express-rate-limit
