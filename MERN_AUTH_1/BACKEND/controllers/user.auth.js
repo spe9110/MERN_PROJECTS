@@ -50,7 +50,7 @@ export const createUser = async (req, res, next) => {
       }, 
       to: newUser.email,
       subject: "Welcome to MERN Auth",
-      text: `Hello ${newUser.name},\n\nThank you for registering with MERN Auth. Your account has been created successfully.\n\nBest regards,\nMERN Auth Team`,
+      text: `Hello ${newUser.name || ""},\n\nThank you for registering with MERN Auth. Your account has been created successfully.\n\nBest regards,\nMERN Auth Team`,
     }
     
     await transporter.sendMail(mailOptions);
@@ -177,7 +177,7 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
       },
       to: user.email,
       subject: "Email Verification OTP",
-      text: `Hello ${user.name || "User"},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
+      text: `Hello ${user.name || ""},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -228,3 +228,84 @@ export const verifyEmail = async (req, res, next) => {
   }
 }
 
+export const isAuthenticated = (req, res, next) => {
+  try {
+    return res.status(200).json({ message: "User is authenticated", userId: req.user });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// send Password Reset OTP to the user's email
+export const PasswordResetEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return next(new AppError(400, "Email is required."));
+    }
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(new AppError(404, "User not found."));
+    }
+    // Generate a random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save the OTP and expiration time to the user's document
+    user.resetOtp = otp;
+    user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    await user.save();
+
+    // Send the OTP to the user's email
+    const mailOptions = {
+      from: {
+        name: "Spencer Wawaku",
+        address: process.env.EMAIL_SENDER
+      },
+      to: user.email,
+      subject: "Password Reset OTP",
+      text: `Hello ${user.name || ""},\n\nYour OTP for password reset is: ${otp}\n\nPlease use this OTP to reset your password.\n\nBest regards,\nMERN Auth Team`,
+    };
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ message: "Password reset email sent successfully." });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return next(new AppError(400, "Email, OTP, and new password are required."));
+    }
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(new AppError(404, "User not found."));
+    }
+    // Check if OTP is correct
+    if (!user.resetOtp || user.resetOtp !== otp) {
+      return next(new AppError(400, "Invalid OTP."));
+    }
+    // Check if OTP has expired
+    if (!user.resetOtpExpireAt || user.resetOtpExpireAt < Date.now()) {
+      return next(new AppError(400, "OTP has expired."));
+    }
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update the user's password
+    user.password = hashedPassword;
+    user.resetOtp = ""; // Clear the OTP after reset
+    user.resetOtpExpireAt = 0; // Clear the expiration time
+
+    await user.save();
+    return res.status(200).json({ message: "Password reset successfully." });
+    
+  } catch (error) {
+    next(error);
+  }
+}

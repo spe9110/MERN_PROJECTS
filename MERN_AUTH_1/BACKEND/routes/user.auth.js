@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { createUser, login, logout, sendOtpVerificationEmail, verifyEmail } from '../controllers/user.auth.js';
+import { createUser, isAuthenticated, login, logout, sendOtpVerificationEmail, verifyEmail, PasswordResetEmail, resetPassword } from '../controllers/user.auth.js';
 import { userAuth } from '../middlewares/userAuth.js';
 
 
@@ -37,5 +37,19 @@ router.post('/send-otp-verify', userAuth, sendOtpVerificationEmail);
 // @endpoint /verify-email
 router.post('/verify-email', userAuth, verifyEmail);
 
+// @desc This route is for checking if the user is authenticated
+// @endpoint /is-authenticated
+router.post('/is-auth', userAuth, isAuthenticated);
+
+
+// @desc This route is for sending password reset OTP to the user's email
+// @endpoint /send-password-reset-email
+// @public
+router.post('/send-reset-password', PasswordResetEmail);
+
+// @desc This route is for resetting the user's password using OTP
+// @endpoint /reset-password
+// @public
+router.post('/reset-password', resetPassword);
 
 export default router;
