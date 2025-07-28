@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import helmet from 'helmet';
 import morgan from "morgan";
 import authRoutes from './routes/user.auth.js';
+import userRoute from './routes/userRoute.js';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 
@@ -42,6 +43,7 @@ app.use(globalLimiter); // Correctly applies to all requests
 
 // Routes
 app.use('/api/v1/users/auth', authRoutes);
+app.use('/api/v1/users/', userRoute);
 
 // Define a route for GET requests to the root URL
 app.get('/', (req, res) => {
