@@ -8,9 +8,6 @@ import morgan from "morgan";
 import authRoutes from './routes/user.auth.js';
 import userRoute from './routes/userRoute.js';
 import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-
-
 import errorHandler from './middlewares/ErrorHandler.js';
 
 
@@ -19,14 +16,6 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-// Global rate limiter
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again after 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // Middlewares
 // Parse request bodies
@@ -36,10 +25,12 @@ app.use(morgan('dev'));
 app.use(helmet());
 
 // Enable cors
-app.use(cors());
+app.use(cors({
+  credentials: true, 
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173'
+}));
 // Middleware for parsing cookies
 app.use(cookieParser());
-app.use(globalLimiter); // Correctly applies to all requests
 
 // Routes
 app.use('/api/v1/users/auth', authRoutes);

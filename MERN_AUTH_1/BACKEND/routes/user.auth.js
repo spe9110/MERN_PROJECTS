@@ -39,7 +39,7 @@ router.post('/verify-email', userAuth, verifyEmail);
 
 // @desc This route is for checking if the user is authenticated
 // @endpoint /is-authenticated
-router.post('/is-auth', userAuth, isAuthenticated);
+router.get('/is-auth', userAuth, isAuthenticated);
 
 
 // @desc This route is for sending password reset OTP to the user's email

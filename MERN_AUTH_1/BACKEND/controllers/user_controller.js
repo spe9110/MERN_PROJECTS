@@ -11,7 +11,7 @@ export const getUserData = async (req, res, next) => {
             return next(new AppError(404, "User not found."));
         }
 
-        return res.status(200).json({
+        return res.status(200).json({ success: true, message: "User data fetched successfully.",
             user: {
                 name: user.name,
                 isAccountVerified: user.isAccountVerified,

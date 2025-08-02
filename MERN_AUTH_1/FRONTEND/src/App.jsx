@@ -4,11 +4,21 @@ import Home from './pages/Home'
 import VerifyEmail from './pages/verifyEmail'
 import Login from './pages/login'
 import ResetPassword from './pages/resetPassword'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
 
   return (
     <div>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          theme="colored"
+        />
       <Routes>
         <Route path='/' element={<Home/>} />
         <Route path='/login' element={<Login />} />

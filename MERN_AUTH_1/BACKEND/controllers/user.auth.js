@@ -64,6 +64,7 @@ export const createUser = async (req, res, next) => {
     });
     // Return only name, email and token
     return res.status(201).json({
+      success: true,
       message: "User created successfully",
       user: {
         name: newUser.name,
@@ -117,6 +118,7 @@ export const login = async (req, res, next) => {
 
     // Return success response
     return res.status(200).json({
+      success: true,
       message: "User login successfully",
       user: {
         name: user.name,
@@ -140,7 +142,7 @@ export const logout = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'Strict'
     });
 
-    return res.status(200).json({ message: "User logged out successfully" });
+    return res.status(200).json({ success: true, message: "User logged out successfully" });
   } catch (error) {
     next(error);
   }
@@ -182,7 +184,7 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({ message: "Verification email sent successfully." });
+    return res.status(200).json({ success: true, message: "Verification email sent successfully." });
 
   } catch (error) {
     next(error);
@@ -221,7 +223,7 @@ export const verifyEmail = async (req, res, next) => {
     
     await user.save();
 
-    return res.status(200).json({ message: "Email verified successfully." });
+    return res.status(200).json({ success: true, message: "Email verified successfully." });
 
   } catch (error) {
     next(error);
@@ -230,7 +232,7 @@ export const verifyEmail = async (req, res, next) => {
 
 export const isAuthenticated = (req, res, next) => {
   try {
-    return res.status(200).json({ message: "User is authenticated", userId: req.user });
+    return res.status(200).json({ success: true, message: "User is authenticated", userId: req.user });
   } catch (error) {
     next(error);
   }
@@ -268,7 +270,7 @@ export const PasswordResetEmail = async (req, res, next) => {
       text: `Hello ${user.name || ""},\n\nYour OTP for password reset is: ${otp}\n\nPlease use this OTP to reset your password.\n\nBest regards,\nMERN Auth Team`,
     };
     await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: "Password reset email sent successfully." });
+    return res.status(200).json({ success: true, message: "Password reset email sent successfully." });
   } catch (error) {
     next(error);
   }
@@ -303,7 +305,7 @@ export const resetPassword = async (req, res, next) => {
     user.resetOtpExpireAt = 0; // Clear the expiration time
 
     await user.save();
-    return res.status(200).json({ message: "Password reset successfully." });
+    return res.status(200).json({ success: true, message: "Password reset successfully." });
     
   } catch (error) {
     next(error);
