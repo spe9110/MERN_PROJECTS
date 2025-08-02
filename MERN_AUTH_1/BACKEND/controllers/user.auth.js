@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import User from "../models/user.model.js";
 import loginUserValidationSchema from "../validation/loginUser.js";
 import { transporter } from "../config/nodemailer.js";
+import { EMAIL_TEMPLATE, PASSWORD_RESET_TEMPLATE } from "../config/emailTemplate.js";
 
 export const createUser = async (req, res, next) => {
   // Validate request body
@@ -50,7 +51,8 @@ export const createUser = async (req, res, next) => {
       }, 
       to: newUser.email,
       subject: "Welcome to MERN Auth",
-      text: `Hello ${newUser.name || ""},\n\nThank you for registering with MERN Auth. Your account has been created successfully.\n\nBest regards,\nMERN Auth Team`,
+      // text: `Hello ${newUser.name || ""},\n\nThank you for registering with MERN Auth. Your account has been created successfully.\n\nBest regards,\nMERN Auth Team`,
+      html: EMAIL_TEMPLATE,
     }
     
     await transporter.sendMail(mailOptions);
@@ -179,7 +181,11 @@ export const sendOtpVerificationEmail = async (req, res, next) => {
       },
       to: user.email,
       subject: "Email Verification OTP",
-      text: `Hello ${user.name || ""},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
+      // text: `Hello ${user.name || ""},\n\nYour OTP for email verification is: ${otp}\n\nPlease use this OTP to verify your email address.\n\nBest regards,\nMERN Auth Team`,
+      html: EMAIL_TEMPLATE
+        .replace("{{otp}}", otp)
+        .replace("{{email}}", user.email)
+        .replace("{{name}}", user.name)
     };
 
     await transporter.sendMail(mailOptions);
@@ -267,7 +273,11 @@ export const PasswordResetEmail = async (req, res, next) => {
       },
       to: user.email,
       subject: "Password Reset OTP",
-      text: `Hello ${user.name || ""},\n\nYour OTP for password reset is: ${otp}\n\nPlease use this OTP to reset your password.\n\nBest regards,\nMERN Auth Team`,
+      // text: `Hello ${user.name || ""},\n\nYour OTP for password reset is: ${otp}\n\nPlease use this OTP to reset your password.\n\nBest regards,\nMERN Auth Team`,
+      html: PASSWORD_RESET_TEMPLATE
+        .replace("{{otp}}", otp)
+        .replace("{{email}}", user.email)
+        .replace("{{name}}", user.name)
     };
     await transporter.sendMail(mailOptions);
     return res.status(200).json({ success: true, message: "OTP was sent to your email address." });

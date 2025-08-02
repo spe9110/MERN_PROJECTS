@@ -1,20 +1,23 @@
+// src/context/AppContext.jsx
 import axios from "axios";
 import { useState, createContext, useEffect } from "react";
 import { toast } from "react-toastify";
 
 export const AppContent = createContext();
 
-export const AppContextProvider = (props) => {
-
-  axios.defaults.withCredentials = true; // Ensure cookies are sent with every request
+export const AppContextProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  axios.defaults.withCredentials = true;
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
   const getAuthState = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/v1/users/auth/is-auth`);
-      if (data.success) {
+
+      if (data.success && data.authenticated) {
         setIsLoggedIn(true);
         await getUserData();
       } else {
@@ -22,40 +25,34 @@ export const AppContextProvider = (props) => {
         setUser(null);
       }
     } catch (error) {
-      if (error.response?.status === 401) {
-        // Do not show toast for unauthorized (expected when not logged in)
-        setIsLoggedIn(false);
-        setUser(null);
-      } else {
-        // Show toast for unexpected errors
-        toast.error(error.message || "Something went wrong");
-      }
+      // Only handle truly unexpected failures (e.g. server down)
+      setIsLoggedIn(false);
+      setUser(null);
+      toast.error(error.message);
     }
   };
 
+
   const getUserData = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/v1/users/data`, {
-        withCredentials: true
-      });
-
+      const { data } = await axios.get(`${backendUrl}/api/v1/users/data`);
       if (data.success) {
         setUser(data.user);
         setIsLoggedIn(true);
       } else {
         setUser(null);
         setIsLoggedIn(false);
-        toast.error(data.message);
+        toast.error(data.message || "Failed to load user data");
       }
     } catch (error) {
       setUser(null);
       setIsLoggedIn(false);
-      toast.error(error.message || 'Failed to fetch user data');
+      toast.error(error?.response?.data?.message || error.message || "User data fetch failed");
     }
   };
 
   useEffect(() => {
-    getAuthState();
+    getAuthState(); // Runs on app load
   }, []);
 
   const value = {
@@ -69,7 +66,7 @@ export const AppContextProvider = (props) => {
 
   return (
     <AppContent.Provider value={value}>
-      {props.children}
+      {children}
     </AppContent.Provider>
   );
 };

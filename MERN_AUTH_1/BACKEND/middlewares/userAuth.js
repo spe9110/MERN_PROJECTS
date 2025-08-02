@@ -9,8 +9,12 @@ export const userAuth = (req, res, next) => {
     req.cookies?.AccessToken ||
     (authHeader && authHeader.startsWith('Bearer ') && authHeader.split(' ')[1]);
 
+  // if (!token) {
+  //   return next(new AppError(401, "Access denied. No token provided."));
+  // }
   if (!token) {
-    return next(new AppError(401, "Access denied. No token provided."));
+    req.user = null; // just mark as not logged in
+    return next();
   }
 
   try {
