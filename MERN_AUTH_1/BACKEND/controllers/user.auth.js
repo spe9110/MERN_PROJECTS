@@ -270,7 +270,7 @@ export const PasswordResetEmail = async (req, res, next) => {
       text: `Hello ${user.name || ""},\n\nYour OTP for password reset is: ${otp}\n\nPlease use this OTP to reset your password.\n\nBest regards,\nMERN Auth Team`,
     };
     await transporter.sendMail(mailOptions);
-    return res.status(200).json({ success: true, message: "Password reset email sent successfully." });
+    return res.status(200).json({ success: true, message: "OTP was sent to your email address." });
   } catch (error) {
     next(error);
   }

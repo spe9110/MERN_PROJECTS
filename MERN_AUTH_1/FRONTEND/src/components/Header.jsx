@@ -5,7 +5,7 @@ function Header() {
   return (
     <section className="w-full h-screen bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
       <div className="text-center px-6 max-w-4xl">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+        <h1 className="text-lg md:text-xl font-bold text-gray-200 leading-tight">
           {user ? `Welcome, ${user.name}` : 'Welcome to Our Application'}
         </h1>
         <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
